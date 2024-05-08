@@ -10,7 +10,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user } = useUserStore();
   const location = useLocation();
 
-  console.log('User: ', user);
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
