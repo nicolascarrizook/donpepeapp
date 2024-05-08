@@ -83,7 +83,7 @@ function Main() {
   };
 
   return (
-    <form className="grid grid-cols-12 gap-y-10 gap-x-6" onSubmit={ handleSubmit }>
+    <div className="grid grid-cols-12 gap-y-10 gap-x-6">
       { showNotification && (
         <Notification getRef={ ( el ) => {
           successNotification.current = el;
@@ -99,25 +99,31 @@ function Main() {
           </div>
         </Notification>
       ) }
-      <div className="col-span-12">
-        <div className="flex flex-col mt-4 md:mt-0 md:h-10 gap-y-3 md:items-center md:flex-row">
-          <div className="text-base font-medium group-[.mode--light]:text-white">
-            Agregar Producto
+      <div className="col-span-12 sm:col-span-10 sm:col-start-2">
+      <div className="flex flex-col lg:items-center lg:flex-row gap-y-2">
+          <div
+            className={ clsx( [
+              "flex items-center lg:justify-center flex-1 lg:first:justify-start lg:last:justify-end group active",
+              "after:hidden before:hidden after:lg:block before:lg:block",
+              "first:after:content-[''] first:after:w-full first:after:bg-slate-300/60 first:after:h-[2px] first:after:ml-5 group-[.mode--light]:first:after:bg-slate-300/20",
+              "last:before:content-[''] last:before:w-full last:before:bg-slate-300/60 last:before:h-[2px] last:before:mr-5 group-[.mode--light]:last:before:bg-slate-300/20",
+              "last:after:hidden after:content-[''] after:w-full after:bg-slate-300/60 after:h-[2px] after:ml-5 group-[.mode--light]:after:bg-slate-300/20",
+              "first:before:hidden before:content-[''] before:w-full before:bg-slate-300/60 before:h-[2px] before:mr-5 group-[.mode--light]:before:bg-slate-300/20",
+            ] ) }
+          >
+            <div className="flex items-center">
+              <div className="ml-3.5 group-[.mode--light]:!text-slate-300 font-medium whitespace-nowrap text-slate-500 group-[.active]:text-current [.group.mode--light_.group.active_&]:!text-slate-100">
+                Información del Producto
+              </div>
+            </div>
           </div>
         </div>
-        <div className="mt-3.5 grid grid-cols-12 xl:grid-cols-10 gap-y-7 lg:gap-y-10 gap-x-6">
+        <div className="mt-5">
           <div className="relative flex flex-col col-span-12 lg:col-span-9 xl:col-span-8 gap-y-7">
             <div className="flex flex-col p-5 box box--stacked">
-              <div className="p-5 border rounded-[0.6rem] border-slate-200/60 dark:border-darkmode-400">
-                <div className="flex items-center pb-5 text-[0.94rem] font-medium border-b border-slate-200/60 dark:border-darkmode-400">
-                  <Lucide
-                    icon="ChevronDown"
-                    className="w-5 h-5 stroke-[1.3] mr-2"
-                  />{ " " }
-                  Información general del Producto
-                </div>
-                <div className="mt-5">
-                  <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
+              <div>
+                <div className="mt-7">
+                  <form className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0" onSubmit={ handleSubmit }>
                     <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
                       <div className="text-left">
                         <div className="flex items-center">
@@ -142,7 +148,7 @@ function Main() {
                       />
                       <FormHelp>Maximo de caracteres 0/70</FormHelp>
                     </div>
-                  </div>
+                  </form>
                   <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
                     <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
                       <div className="text-left">
@@ -319,7 +325,7 @@ function Main() {
           </div>
         </div>
       </div>
-    </form>
+    </div>
   );
 }
 
