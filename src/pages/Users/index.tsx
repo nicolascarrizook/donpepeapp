@@ -1,15 +1,20 @@
 import Lucide from "@/components/Base/Lucide";
-import { Menu, Popover } from "@/components/Base/Headless";
-import Pagination from "@/components/Base/Pagination";
-import { FormCheck, FormInput, FormSelect } from "@/components/Base/Form";
-import Tippy from "@/components/Base/Tippy";
-import users from "@/fakers/users";
+import { Menu } from "@/components/Base/Headless";
+import { FormCheck, FormInput } from "@/components/Base/Form";
 import Button from "@/components/Base/Button";
 import Table from "@/components/Base/Table";
 import clsx from "clsx";
 import _ from "lodash";
+import { useEmployeeStore } from '@/stores/employes';
+import { useEffect } from 'react';
 
 function Main() {
+  const { employees, loadEmployees } = useEmployeeStore();
+
+  useEffect(() => {
+    loadEmployees();
+  }, []);
+
   return (
     <div className="grid grid-cols-12 gap-y-10 gap-x-6">
       <div className="col-span-12">
@@ -24,19 +29,20 @@ function Main() {
               <div className="col-span-4 md:col-span-2 xl:col-span-1 p-5 border border-dashed rounded-[0.6rem] border-slate-300/80 box shadow-sm">
                 <div className="text-base text-slate-500">Emplados registrados</div>
                 <div className="mt-1.5 text-2xl font-medium">
-                  {users.fakeUsers().length}
+                  {employees.length}
                 </div>
               </div>
               <div className="col-span-4 md:col-span-2 xl:col-span-1 p-5 border border-dashed rounded-[0.6rem] border-slate-300/80 box shadow-sm">
                 <div className="text-base text-slate-500">Empleados activos</div>
                 <div className="mt-1.5 text-2xl font-medium">
-                  {_.filter(users.fakeUsers(), { status: "Active" }).length}
+                  {_.filter(employees, { status: 'activo' }).length}
+                 
                 </div>
               </div>
               <div className="col-span-4 md:col-span-2 xl:col-span-1 p-5 border border-dashed rounded-[0.6rem] border-slate-300/80 box shadow-sm">
                 <div className="text-base text-slate-500">Nuevos empleados</div>
                 <div className="mt-1.5 text-2xl font-mediumm">
-                  {_.filter(users.fakeUsers(), { status: "New" }).length}
+                  {_.filter(employees, { status: 'nuevo' }).length}
                 </div>
               </div>
             </div>
@@ -84,75 +90,6 @@ function Main() {
                     </Menu.Item>
                   </Menu.Items>
                 </Menu>
-                <Popover className="inline-block">
-                  {({ close }) => (
-                    <>
-                      <Popover.Button
-                        as={Button}
-                        variant="outline-secondary"
-                        className="w-full sm:w-auto"
-                      >
-                        <Lucide
-                          icon="ArrowDownWideNarrow"
-                          className="stroke-[1.3] w-4 h-4 mr-2"
-                        />
-                        Filter
-                        <div className="flex items-center justify-center h-5 px-1.5 ml-2 text-xs font-medium border rounded-full bg-slate-100">
-                          3
-                        </div>
-                      </Popover.Button>
-                      <Popover.Panel placement="bottom-end">
-                        <div className="p-2">
-                          <div>
-                            <div className="text-left text-slate-500">
-                              Position
-                            </div>
-                            <FormSelect className="flex-1 mt-2">
-                              {_.take(users.fakeUsers(), 5).map(
-                                (faker, fakerKey) => (
-                                  <option key={fakerKey} value={faker.position}>
-                                    {faker.position}
-                                  </option>
-                                )
-                              )}
-                            </FormSelect>
-                          </div>
-                          <div className="mt-3">
-                            <div className="text-left text-slate-500">
-                              Department
-                            </div>
-                            <FormSelect className="flex-1 mt-2">
-                              {_.take(users.fakeUsers(), 5).map(
-                                (faker, fakerKey) => (
-                                  <option
-                                    key={fakerKey}
-                                    value={faker.department}
-                                  >
-                                    {faker.department}
-                                  </option>
-                                )
-                              )}
-                            </FormSelect>
-                          </div>
-                          <div className="flex items-center mt-4">
-                            <Button
-                              variant="secondary"
-                              onClick={() => {
-                                close();
-                              }}
-                              className="w-32 ml-auto"
-                            >
-                              Close
-                            </Button>
-                            <Button variant="primary" className="w-32 ml-2">
-                              Apply
-                            </Button>
-                          </div>
-                        </div>
-                      </Popover.Panel>
-                    </>
-                  )}
-                </Popover>
               </div>
             </div>
             <div className="overflow-auto xl:overflow-visible">
@@ -183,41 +120,31 @@ function Main() {
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {_.take(users.fakeUsers(), 10).map((faker, fakerKey) => (
-                    <Table.Tr key={fakerKey} className="[&_td]:last:border-b-0">
+                  {employees.map((emp, index) => (
+                    <Table.Tr key={index} className="[&_td]:last:border-b-0">
                       <Table.Td className="py-4 border-dashed dark:bg-darkmode-600">
                         <FormCheck.Input type="checkbox" />
                       </Table.Td>
                       <Table.Td className="py-4 border-dashed w-80 dark:bg-darkmode-600">
                         <div className="flex items-center">
-                          <div className="w-9 h-9 image-fit zoom-in">
-                            <Tippy
-                              as="img"
-                              alt="Tailwise - Admin Dashboard Template"
-                              className="rounded-full shadow-[0px_0px_0px_2px_#fff,_1px_1px_5px_rgba(0,0,0,0.32)] dark:shadow-[0px_0px_0px_2px_#3f4865,_1px_1px_5px_rgba(0,0,0,0.32)]"
-                              src={faker.photo}
-                              content={faker.name}
-                            />
-                          </div>
                           <div className="ml-3.5">
                             <a
                               href=""
                               className="font-medium whitespace-nowrap"
                             >
-                              {faker.name}
+                              {emp.fullName}
                             </a>
                             <div className="text-slate-500 text-xs whitespace-nowrap mt-0.5">
-                              {faker.email}
+                              {emp.email}
                             </div>
                           </div>
                         </div>
                       </Table.Td>
                       <Table.Td className="py-4 border-dashed dark:bg-darkmode-600">
                         <a href="" className="font-medium whitespace-nowrap">
-                          {faker.position}
+                          {emp.department}
                         </a>
                         <div className="text-slate-500 text-xs whitespace-nowrap mt-0.5">
-                          {faker.department}
                         </div>
                       </Table.Td>
                       <Table.Td className="py-4 border-dashed dark:bg-darkmode-600">
@@ -245,7 +172,9 @@ function Main() {
                         <div
                           className={clsx([
                             "flex items-center justify-center",
-                            ["text-success", "text-danger"][_.random(0, 1)],
+                            emp.status === 'activo'
+                              ? "text-green-500"
+                              : "text-danger",
                           ])}
                         >
                           <Lucide
@@ -253,13 +182,13 @@ function Main() {
                             className="w-3.5 h-3.5 stroke-[1.7]"
                           />
                           <div className="ml-1.5 whitespace-nowrap">
-                            {_.random(0, 1) ? "Active" : "Inactive"}
+                            {emp.status === 'activo' ? 'Activo' : 'Inactivo'}
                           </div>
                         </div>
                       </Table.Td>
                       <Table.Td className="py-4 border-dashed dark:bg-darkmode-600">
                         <div className="whitespace-nowrap">
-                          {faker.joinedDate}
+                          {emp.dateOfBirth}
                         </div>
                       </Table.Td>
                       <Table.Td className="relative py-4 border-dashed dark:bg-darkmode-600">
@@ -294,33 +223,6 @@ function Main() {
                   ))}
                 </Table.Tbody>
               </Table>
-            </div>
-            <div className="flex flex-col-reverse flex-wrap items-center p-5 flex-reverse gap-y-2 sm:flex-row">
-              <Pagination className="flex-1 w-full mr-auto sm:w-auto">
-                <Pagination.Link>
-                  <Lucide icon="ChevronsLeft" className="w-4 h-4" />
-                </Pagination.Link>
-                <Pagination.Link>
-                  <Lucide icon="ChevronLeft" className="w-4 h-4" />
-                </Pagination.Link>
-                <Pagination.Link>...</Pagination.Link>
-                <Pagination.Link>1</Pagination.Link>
-                <Pagination.Link active>2</Pagination.Link>
-                <Pagination.Link>3</Pagination.Link>
-                <Pagination.Link>...</Pagination.Link>
-                <Pagination.Link>
-                  <Lucide icon="ChevronRight" className="w-4 h-4" />
-                </Pagination.Link>
-                <Pagination.Link>
-                  <Lucide icon="ChevronsRight" className="w-4 h-4" />
-                </Pagination.Link>
-              </Pagination>
-              <FormSelect className="sm:w-20 rounded-[0.5rem]">
-                <option>10</option>
-                <option>25</option>
-                <option>35</option>
-                <option>50</option>
-              </FormSelect>
             </div>
           </div>
         </div>

@@ -1,85 +1,79 @@
 import { create } from 'zustand';
 import { db } from '@/services/firebase/firebase.service';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 
-interface FoodItem {
+interface ProductItem {
+  id?: string;
   name: string;
   price: number;
   discount: number;
-  category: 'foods';
+  category: 'foods' | 'drinks' | 'beers';
   isActive: boolean;
 }
-
-interface DrinkItem {
-  name: string;
-  price: number;
-  discount: number;
-  category: 'drinks';
-  isActive: boolean;
-}
-
-interface BeerItem {
-  name: string;
-  price: number;
-  discount: number;
-  category: 'beers';
-  isActive: boolean;
-}
-
-interface ProductCategories {
-  foods: FoodItem[];
-  drinks: DrinkItem[];
-  beers: BeerItem[];
-}
-
-type ProductItem = FoodItem | DrinkItem | BeerItem
 
 type ProductStore = {
-  products: ProductCategories;
+  products: ProductItem[];
   fetchProducts: () => Promise<void>;
-  addProduct: (category: keyof ProductCategories, product: ProductItem) => Promise<void>;
-  updateProduct: (category: keyof ProductCategories, product: ProductItem, docId: string) => Promise<void>;
-  deleteProduct: (category: keyof ProductCategories, docId: string) => Promise<void>;
+  addProduct: (product: ProductItem, file: File) => Promise<void>;
+  updateProduct: (product: ProductItem) => Promise<void>;
+  deleteProduct: (docId: string) => Promise<void>;
 };
 
 export const useProductStore = create<ProductStore>((set, get) => ({
-  products: {
-    foods: [],
-    drinks: [],
-    beers: []
-  },
+  products: [],
 
   fetchProducts: async () => {
     const snapshot = await getDocs(collection(db, 'products'));
-    let products: ProductCategories = { foods: [], drinks: [], beers: [] };
+    let products: ProductItem[] = [];
     snapshot.forEach((doc) => {
       const data = doc.data() as ProductItem;
-      switch (data.category) {
-        case 'foods':
-          products.foods.push(data as FoodItem);
-          break;
-        case 'drinks':
-          products.drinks.push(data as DrinkItem);
-          break;
-        case 'beers':
-          products.beers.push(data as BeerItem);
-          break;
-      }
+      data.id = doc.id; 
+      products.push(data);
     });
     set({ products });
   },
 
-  addProduct: async (category, product) => {
-    const docRef = await addDoc(collection(db, 'products'), { ...product, category });
-    console.log("Document written with ID: ", docRef.id);
+  addProduct: async (product, file) => {
+    try {
+      const storageRef = ref(getStorage(), `products/${file.name}`);
+      await uploadBytes(storageRef, file);
+      const imageUrl = await getDownloadURL(storageRef);
+
+      const newProduct = { ...product, imageUrl };
+      const docRef = await addDoc(collection(db, 'products'), newProduct);
+
+      get().fetchProducts(); 
+      console.log("Product added with image successfully");
+    } catch (error) {
+      console.error("Error adding product with image: ", error);
+    }
   },
 
-  updateProduct: async (category, product, docId) => {
-    const docRef = doc(db, 'products', docId);
-    await updateDoc(docRef, { ...product, category });
-  },
 
-  deleteProduct: async (category, docId) => {
+  updateProduct: async (product) => {
+    if (!product.id) return; 
+    
+    const updateData = {
+      name: product.name,
+      price: product.price,
+      discount: product.discount,
+      category: product.category,
+      isActive: product.isActive
+    };
+  
+    const docRef = doc(db, 'products', product.id);
+  
+    try {
+      await updateDoc(docRef, updateData);
+      console.log("Product updated successfully");
+      get().fetchProducts(); 
+    } catch (error) {
+      console.error("Error updating product: ", error);
+    }
+  },
+  deleteProduct: async (docId) => {
     await deleteDoc(doc(db, 'products', docId));
+    get().fetchProducts(); 
   }
 }));

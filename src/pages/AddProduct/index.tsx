@@ -23,81 +23,71 @@ import _ from "lodash";
 import { useProductStore } from '@/stores/products.store';
 import Notification, { NotificationElement } from '@/components/Base/Notification';
 
-interface FoodItem {
+type Category = 'foods' | 'drinks' | 'beers';
+interface ProductItem {
   name: string;
   price: number;
   discount: number;
-  category: 'foods';
-  isActive: boolean; 
-}
-
-interface DrinkItem {
-  name: string;
-  sizes: { [key: string]: number };
-  discount: number;
-  category: 'drinks';
-  isActive: boolean; 
-}
-
-interface BeerItem {
-  name: string;
-  literPrice: number;
-  canPrice: number;
-  discount: number;
-  category: 'beers';
+  category: Category;
   isActive: boolean;
 }
 
-interface ProductCategories {
-  foods: FoodItem[];
-  drinks: DrinkItem[];
-  beers: BeerItem[];
-}
-
 function Main() {
-  const [subcategory, setSubcategory] = useState(["0"]);
+  const [ productName, setProductName ] = useState( '' );
+  const [ category, setCategory ] = useState<Category>( 'foods' );
+  const [ price, setPrice ] = useState( '' );
+  const [ isActive, setIsActive ] = useState( false );
+  const [ showNotification, setShowNotification ] = useState( false );
   const { addProduct } = useProductStore();
-  const [productName, setProductName] = useState('');
-  const [category, setCategory] = useState<CategoryKey>('foods');
-  const [showNotification, setShowNotification] = useState(false);
-  const [price, setPrice] = useState('');
-  const [isActive, setIsActive] = useState(false);
-  type CategoryKey = keyof ProductCategories;
+  const [ files, setFiles ] = useState<File[]>( [] );
 
   const resetFields = () => {
-    setProductName('');
-    setPrice('');
-    setIsActive(false);
+    setProductName( '' );
+    setPrice( '' );
+    setIsActive( false );
+    setCategory( 'foods' );
+    setFiles( [] );
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    try {
-      await addProduct(category, {
-        name: productName,
-        price: parseFloat(price),
-        discount: 0,
-        category: category,
-        isActive: isActive,
-      });
-      setShowNotification(true);
-      setTimeout(() => {
-        successNotification.current?.showToast();
-      }, 500);
-      resetFields();
-    } catch (error) {
-      console.error("Failed to add product:", error);
+  const handleFileChange = (event: any) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      setFiles(Array.from(files)); 
     }
   };
   
   const successNotification = useRef<NotificationElement>();
 
+  const handleSubmit = async (event: any) => {
+    event.preventDefault();
+    if (!files.length) {
+      alert("Please upload at least one product image.");
+      return;
+    }
+    try {
+      await addProduct({
+        name: productName,
+        price: parseFloat(price),
+        discount: 0,
+        category,
+        isActive,
+      }, files[0]);
+      resetFields();
+      setShowNotification(true);
+      setTimeout(() => {
+        successNotification.current?.showToast();
+      }, 500);
+    } catch (error) {
+      console.error("Failed to add product:", error);
+    }
+  };
+
   return (
-    <form className="grid grid-cols-12 gap-y-10 gap-x-6" onSubmit={handleSubmit}>
-       {showNotification && (
-        <Notification getRef={(el) => {
-            successNotification.current = el;
-          }}
+    <form className="grid grid-cols-12 gap-y-10 gap-x-6" onSubmit={ handleSubmit }>
+      { showNotification && (
+        <Notification getRef={ ( el ) => {
+          successNotification.current = el;
+        } }
           className="flex"
         >
           <Lucide icon="CheckCircle" className="text-success" />
@@ -108,7 +98,7 @@ function Main() {
             </div>
           </div>
         </Notification>
-      )}
+      ) }
       <div className="col-span-12">
         <div className="flex flex-col mt-4 md:mt-0 md:h-10 gap-y-3 md:items-center md:flex-row">
           <div className="text-base font-medium group-[.mode--light]:text-white">
@@ -123,7 +113,7 @@ function Main() {
                   <Lucide
                     icon="ChevronDown"
                     className="w-5 h-5 stroke-[1.3] mr-2"
-                  />{" "}
+                  />{ " " }
                   Información general del Producto
                 </div>
                 <div className="mt-5">
@@ -145,10 +135,10 @@ function Main() {
                       <FormInput
                         type="text"
                         placeholder="Nombre del producto"
-                        name="name" 
+                        name="name"
                         required
-                        value={productName}
-                        onChange={(e) => setProductName(e.target.value)}
+                        value={ productName }
+                        onChange={ ( e ) => setProductName( e.target.value ) }
                       />
                       <FormHelp>Maximo de caracteres 0/70</FormHelp>
                     </div>
@@ -168,50 +158,16 @@ function Main() {
                       </div>
                     </label>
                     <div className="flex-1 w-full mt-3 xl:mt-0">
-                    <FormSelect
-                      id="category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value as CategoryKey)} // Cast seguro, asumiendo que los valores en el select son válidos
-                      required
-                    >
-                      <option value="foods">Sangucheria</option>
-                      <option value="drinks">Bebidas</option>
-                      <option value="beers">Cervezas</option>
-                    </FormSelect>
-                    </div>
-                  </div>
-                  <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
-                    <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
-                      <div className="text-left">
-                        <div className="flex items-center">
-                          <div className="font-medium">Subcategoria</div>
-                          <div className="ml-2.5 px-2 py-0.5 bg-slate-100 text-slate-500 dark:bg-darkmode-300 dark:text-slate-400 text-xs rounded-md border border-slate-200">
-                            Requerido
-                          </div>
-                        </div>
-                        <div className="mt-1.5 xl:mt-3 text-xs leading-relaxed text-slate-500/80">
-                          Seleccione la subcategoría de su producto.
-                        </div>
-                      </div>
-                    </label>
-                    <div className="flex-1 w-full mt-3 xl:mt-0">
-                      <TomSelect
-                        value={subcategory}
-                        onChange={(e) => {
-                          setSubcategory(e.target.value);
-                        }}
-                        options={{
-                          placeholder: "",
-                        }}
-                        className="w-full"
-                        multiple
+                      <FormSelect
+                        id="category"
+                        value={ category }
+                        onChange={ ( e ) => setCategory( e.target.value as Category ) }
+                        required
                       >
-                        {categories.fakeCategories().map((faker, fakerKey) => (
-                          <option key={fakerKey} value={fakerKey}>
-                            {faker.name}
-                          </option>
-                        ))}
-                      </TomSelect>
+                        <option value="foods">Sangucheria</option>
+                        <option value="drinks">Bebidas</option>
+                        <option value="beers">Cervezas</option>
+                      </FormSelect>
                     </div>
                   </div>
                   <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
@@ -230,17 +186,17 @@ function Main() {
                       </div>
                     </label>
                     <div className="flex-1 w-full mt-3 xl:mt-0">
-                    <FormSwitch>
-                    <FormSwitch.Input
-                      id="product-status-active"
-                      type="checkbox"
-                      checked={isActive}
-                      onChange={() => setIsActive(!isActive)}
-                    />
-                    <FormSwitch.Label htmlFor="product-status-active">
-                      Activo
-                    </FormSwitch.Label>
-                  </FormSwitch>
+                      <FormSwitch>
+                        <FormSwitch.Input
+                          id="product-status-active"
+                          type="checkbox"
+                          checked={ isActive }
+                          onChange={ () => setIsActive( !isActive ) }
+                        />
+                        <FormSwitch.Label htmlFor="product-status-active">
+                          Activo
+                        </FormSwitch.Label>
+                      </FormSwitch>
                     </div>
                   </div>
                   <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
@@ -266,9 +222,9 @@ function Main() {
                           type="number"
                           placeholder="Precio del producto"
                           name="price"
-                          required 
-                          value={price}
-                          onChange={(e) => setPrice(e.target.value)}
+                          required
+                          value={ price }
+                          onChange={ ( e ) => setPrice( e.target.value ) }
                         />
                       </InputGroup>
                     </div>
@@ -282,7 +238,7 @@ function Main() {
                   <Lucide
                     icon="ChevronDown"
                     className="w-5 h-5 stroke-[1.3] mr-2"
-                  />{" "}
+                  />{ " " }
                   Cargar Imágenes del Producto
                 </div>
                 <div className="mt-5">
@@ -296,50 +252,46 @@ function Main() {
                           </div>
                         </div>
                         <div className="mt-1.5 xl:mt-3 text-xs leading-relaxed text-slate-500/80">
-                            Cargar imágenes de su producto.
-                            Las imágenes deben ser de alta calidad y mostrar el producto desde diferentes ángulos.
+                          Cargar imágenes de su producto.
+                          Las imágenes deben ser de alta calidad y mostrar el producto desde diferentes ángulos.
                         </div>
                       </div>
                     </label>
                     <div className="flex-1 w-full mt-3 xl:mt-0">
                       <div className="border border-dashed rounded-md border-slate-300/80">
                         <div className="grid grid-cols-9 gap-5 px-5 pt-5 sm:grid-cols-10">
-                          {_.take(products.fakeProducts(), 5).map(
-                            (faker, fakerKey) => (
-                              <div
-                                key={fakerKey}
-                                className="relative h-24 col-span-3 cursor-pointer md:col-span-2 image-fit zoom-in"
+                          { files.map( ( file, index ) => (
+                            <div key={ index } className="relative h-24 col-span-3 cursor-pointer md:col-span-2 image-fit zoom-in">
+                              <img
+                                className="rounded-lg"
+                                src={ URL.createObjectURL( file ) }
+                                alt="Preview"
+                              />
+                              <button
+                                type="button"
+                                className="absolute top-0 right-0 w-5 h-5 -mt-2 -mr-2 bg-white rounded-full"
+                                onClick={ () => {
+                                  const newFiles = files.filter( ( _, i ) => i !== index );
+                                  setFiles( newFiles );
+                                } }
                               >
-                                <img
-                                  className="rounded-lg"
-                                  alt="Tailwise - Admin Dashboard Template"
-                                  src={faker.images[0].path}
-                                />
-                                <Tippy
-                                  content="Remove this image?"
-                                  className="absolute top-0 right-0 w-5 h-5 -mt-2 -mr-2 bg-white rounded-full"
-                                >
-                                  <div className="flex items-center justify-center w-full h-full text-white border rounded-full bg-danger/80 border-danger/50">
-                                    <Lucide
-                                      icon="X"
-                                      className="w-4 h-4 stroke-[1.3]"
-                                    />
-                                  </div>
-                                </Tippy>
-                              </div>
-                            )
-                          )}
+                                <Lucide icon="X" className="w-4 h-4 stroke-[1.3]" />
+                              </button>
+                            </div>
+                          ) ) }
                         </div>
                         <div className="relative flex items-center justify-center px-4 pb-4 mt-5 cursor-pointer">
                           <Lucide icon="Image" className="w-4 h-4 mr-2" />
                           <span className="mr-1 text-primary">
                             Cargar Imágenes
-                          </span>{" "}
+                          </span>{ " " }
                           o arrastrar y soltar
                           <FormInput
                             id="horizontal-form-1"
                             type="file"
                             className="absolute top-0 left-0 w-full h-full opacity-0"
+                            multiple
+                            onChange={ handleFileChange }
                           />
                         </div>
                       </div>

@@ -29,6 +29,7 @@ function Main() {
       return;  
     }
     setFormError('');  
+    setEmployee({ dateOfBirth });
     try {
       await saveEmployee();
       setShowNotification(true);
@@ -39,11 +40,13 @@ function Main() {
         fullName: '',
         dateOfBirth: undefined,
         email: '',
-        gender: 'male',
         phoneNumber: '',
+        phoneType: '',
+        department: '',
+        status: '',
+        isActive: false,
       });
     } catch (error) {
-      console.log('Error: ', error);
       setFormError('Ocurrió un error al guardar la información del empleado.');
     }
   };
@@ -87,48 +90,6 @@ function Main() {
         <div className="mt-7"> 
           <form className="flex flex-col box box--stacked" onSubmit={handleSubmit}>
             <div className="p-7">
-              <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
-                <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
-                  <div className="text-left">
-                    <div className="flex items-center">
-                      <div className="font-medium">Foto del empleado</div>
-                    </div>
-                    <div className="mt-1.5 xl:mt-3 text-xs leading-relaxed text-slate-500/80">
-                      Sube una foto de perfil de tu empleado.
-                    </div>
-                  </div>
-                </label>
-                <div className="flex-1 w-full mt-3 xl:mt-0">
-                  <div className="flex items-center">
-                    <div className="relative flex items-center justify-center w-24 h-24 border rounded-full bg-primary/5 border-primary/10">
-                      <Lucide
-                        icon="User"
-                        className="w-[65%] h-[65%] fill-slate-300/70 -mt-1.5 stroke-[0.5] stroke-slate-400/50"
-                      />
-                      <a
-                        href=""
-                        className="absolute bottom-0 right-0 flex items-center justify-center rounded-full box w-7 h-7"
-                      >
-                        <Lucide
-                          icon="Pencil"
-                          className="w-3.5 h-3.5 stroke-[1.3] text-slate-500"
-                        />
-                      </a>
-                    </div>
-                    <Button
-                      variant="outline-secondary"
-                      size="sm"
-                      className="pl-3.5 pr-4 mr-2 h-8 ml-8"
-                    >
-                      <Lucide
-                        icon="Trash2"
-                        className="w-3.5 h-3.5 mr-1.5 stroke-[1.3]"
-                      />{ " " }
-                      Eliminar
-                    </Button>
-                  </div>
-                </div>
-              </div>
               <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
                 <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
                   <div className="text-left">
@@ -320,15 +281,54 @@ function Main() {
                       <option value="home">Casa</option>
                     </FormSelect>
                   </div>
-                  <a
-                    className="flex items-center mt-3.5 -mb-1 font-medium text-primary"
-                    href=""
-                  >
-                    <Lucide className="w-4 h-4 stroke-[1.3] mr-1" icon="Plus" />
-                    Agregar teléfono
-                  </a>
                 </div>
               </div>
+              <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
+                <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
+                  <div className="text-left">
+                    <div className="flex items-center">
+                      <div className="font-medium">Departamento</div>
+                    </div>
+                    <div className="mt-1.5 xl:mt-3 text-xs leading-relaxed text-slate-500/80">
+                      Seleccione el departamento al que pertenece su empleado.
+                    </div>
+                  </div>
+                </label>
+                <div className="flex-1 w-full mt-3 xl:mt-0">
+                  <FormSelect
+                    value={ employee.department }
+                    onChange={ ( e ) => handleInputChange( 'department', e.target.value ) }
+                    className="..."
+                  >
+                    <option value="sales">Ventas</option>
+                    <option value="delivery">Delivery</option>
+                    <option value="cocina">Cocina</option>
+                  </FormSelect>
+                </div>
+              </div>
+              <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
+                <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
+                  <div className="text-left">
+                    <div className="flex items-center">
+                      <div className="font-medium">Estado</div>
+                    </div>
+                    <div className="mt-1.5 xl:mt-3 text-xs leading-relaxed text-slate-500/80">
+                      Seleccione el estado del empleado.
+                    </div>
+                  </div>
+                </label>
+                <div className="flex-1 w-full mt-3 xl:mt-0">
+                  <FormSelect
+                    value={ employee.status }
+                    onChange={ ( e ) => handleInputChange( 'status', e.target.value ) }
+                    className="..."
+                  >
+                    <option value="activo">Activo</option>
+                    <option value="inactivo">Inactivo</option>
+                  </FormSelect>
+                </div>
+            </div>
+
             </div>
             <div className="flex py-5 border-t md:justify-end px-7 border-slate-200/80">
               <Button
