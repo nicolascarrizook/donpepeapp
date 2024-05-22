@@ -20,7 +20,7 @@ function Main() {
       <div className="col-span-12">
         <div className="flex flex-col md:h-10 gap-y-3 md:items-center md:flex-row">
           <div className="text-base font-medium group-[.mode--light]:text-white">
-            MI PERSONAL
+            Empleados
           </div>
         </div>
         <div className="flex flex-col gap-8 mt-3.5">

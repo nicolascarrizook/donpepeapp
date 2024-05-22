@@ -1,22 +1,12 @@
 import Lucide from "@/components/Base/Lucide";
-import TomSelect from "@/components/Base/TomSelect";
-import { ClassicEditor } from "@/components/Base/Ckeditor";
 import {
-  FormLabel,
-  FormCheck,
   FormInput,
-  FormInline,
   FormSelect,
   FormSwitch,
   InputGroup,
   FormHelp,
 } from "@/components/Base/Form";
-import Alert from "@/components/Base/Alert";
-import Tippy from "@/components/Base/Tippy";
-import products from "@/fakers/products";
-import categories from "@/fakers/categories";
 import Button from "@/components/Base/Button";
-import Table from "@/components/Base/Table";
 import { useRef, useState } from "react";
 import clsx from "clsx";
 import _ from "lodash";
@@ -24,13 +14,6 @@ import { useProductStore } from '@/stores/products.store';
 import Notification, { NotificationElement } from '@/components/Base/Notification';
 
 type Category = 'foods' | 'drinks' | 'beers';
-interface ProductItem {
-  name: string;
-  price: number;
-  discount: number;
-  category: Category;
-  isActive: boolean;
-}
 
 function Main() {
   const [ productName, setProductName ] = useState( '' );
@@ -71,6 +54,7 @@ function Main() {
         discount: 0,
         category,
         isActive,
+        imageUrl: '',
       }, files[0]);
       resetFields();
       setShowNotification(true);
@@ -118,12 +102,12 @@ function Main() {
             </div>
           </div>
         </div>
-        <div className="mt-5">
+        <form className="mt-5" onSubmit={ handleSubmit }>
           <div className="relative flex flex-col col-span-12 lg:col-span-9 xl:col-span-8 gap-y-7">
             <div className="flex flex-col p-5 box box--stacked">
-              <div>
-                <div className="mt-7">
-                  <form className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0" onSubmit={ handleSubmit }>
+            <div className="p-5 border rounded-[0.6rem] border-slate-200/80 dark:border-darkmode-400">
+                <div className="mt-7 ">
+                  <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0" >
                     <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
                       <div className="text-left">
                         <div className="flex items-center">
@@ -148,7 +132,7 @@ function Main() {
                       />
                       <FormHelp>Maximo de caracteres 0/70</FormHelp>
                     </div>
-                  </form>
+                  </div>
                   <div className="flex-col block pt-5 mt-5 xl:items-center sm:flex xl:flex-row first:mt-0 first:pt-0">
                     <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
                       <div className="text-left">
@@ -252,7 +236,9 @@ function Main() {
                     <label className="inline-block mb-2 sm:mb-0 sm:mr-5 sm:text-right xl:w-60 xl:mr-14">
                       <div className="text-left">
                         <div className="flex items-center">
-                          <div className="font-medium">Product Photos</div>
+                          <div className="font-medium">
+                            Imágenes del producto
+                          </div>
                           <div className="ml-2.5 px-2 py-0.5 bg-slate-100 text-slate-500 dark:bg-darkmode-300 dark:text-slate-400 text-xs rounded-md border border-slate-200">
                             Requerido
                           </div>
@@ -317,13 +303,14 @@ function Main() {
               <Button
                 variant="primary"
                 className="w-full md:w-56 py-2.5 rounded-[0.5rem]"
+                type="submit"
               >
                 <Lucide icon="PenLine" className="stroke-[1.3] w-4 h-4 mr-2" />
                 Guardar Producto
               </Button>
             </div>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

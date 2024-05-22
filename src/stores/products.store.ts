@@ -10,6 +10,8 @@ interface ProductItem {
   discount: number;
   category: 'foods' | 'drinks' | 'beers';
   isActive: boolean;
+  imageUrl: string;
+  quantity?: number;
 }
 
 type ProductStore = {

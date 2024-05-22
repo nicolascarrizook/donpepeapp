@@ -10,7 +10,7 @@ import Invoice from "../pages/Invoice";
 import Categories from "../pages/Categories";
 import AddProduct from "../pages/AddProduct";
 import ProductList from "../pages/ProductList";
-import ProductGrid from "../pages/ProfileOverview/ProductGrid";
+import ProductGrid from "../pages/Orders";
 import TransactionList from "../pages/TransactionList";
 import TransactionDetail from "../pages/TransactionDetail";
 import SellerList from "../pages/SellerList";
@@ -104,7 +104,15 @@ function Router() {
           ),
         },
         {
-          path: "product-grid",
+          path: "product-list",
+          element: (
+            <ProtectedRoute>
+              <ProductList />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "orders",
           element: (
             <ProtectedRoute>
               <ProductGrid />

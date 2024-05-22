@@ -37,7 +37,7 @@ const initialState: SideMenuState = {
     "PRODUCTOS",
     {
       icon: "Package",
-      pathname: "/product-grid",
+      pathname: "/product-list",
       title: "Productos",
     },
     {
